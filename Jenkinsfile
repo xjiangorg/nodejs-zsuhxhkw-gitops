@@ -5,13 +5,27 @@ library identifier: 'RHTAP_Jenkins@v1.5', retriever: modernSCM(
    remote: 'https://github.com/redhat-appstudio/tssc-sample-jenkins.git'])
 
 pipeline {
-    agent any
+    agent {
+  kubernetes {
+    label 'jenkins-agent'
+    cloud 'openshift'
+    serviceAccount 'jenkins'
+    podRetention onFailure()
+    idleMinutes '5'
+    containerTemplate {
+     name 'jnlp'
+     image 'quay.io/jkopriva/rhtap-jenkins-agent:0.2'
+     ttyEnabled true
+     args '${computer.jnlpmac} ${computer.name}'
+   }
+   }
+}
     environment {
         /* Not used but init.sh will fail if they're missing */
         COSIGN_SECRET_PASSWORD = 'dummy'
         COSIGN_SECRET_KEY = 'dummy'
         /* Used to verify the image signature and attestation */
-        /* COSIGN_PUBLIC_KEY = credentials('COSIGN_PUBLIC_KEY') */
+        /* /* COSIGN_PUBLIC_KEY = credentials('COSIGN_PUBLIC_KEY') */ */
         /* URL of the BOMbastic api host (e.g. https://sbom.trustification.dev) */
         /* TRUSTIFICATION_BOMBASTIC_API_URL = credentials('TRUSTIFICATION_BOMBASTIC_API_URL') */
         /* URL of the OIDC token issuer (e.g. https://sso.trustification.dev/realms/chicken) */
@@ -26,8 +40,8 @@ pipeline {
         /* IMAGE_REGISTRY_USER = credentials('IMAGE_REGISTRY_USER') */
         TRUSTIFICATION_OIDC_CLIENT_SECRET = credentials('TRUSTIFICATION_OIDC_CLIENT_SECRET')
         /* Set this password for your specific registry */
-        /* IMAGE_REGISTRY_PASSWORD = credentials('IMAGE_REGISTRY_PASSWORD') */
-        QUAY_IO_CREDS = credentials('QUAY_IO_CREDS')
+        IMAGE_REGISTRY_PASSWORD = credentials('IMAGE_REGISTRY_PASSWORD')
+        /* QUAY_IO_CREDS = credentials('QUAY_IO_CREDS') */
         /* ARTIFACTORY_IO_CREDS = credentials('ARTIFACTORY_IO_CREDS') */
         /* NEXUS_IO_CREDS = credentials('NEXUS_IO_CREDS') */
     }
