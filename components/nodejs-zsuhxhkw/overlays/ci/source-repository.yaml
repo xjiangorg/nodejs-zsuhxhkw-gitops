@@ -1,0 +1,6 @@
+apiVersion: "pipelinesascode.tekton.dev/v1alpha1"
+kind: Repository
+metadata:
+  name: nodejs-zsuhxhkw-repository
+spec:
+  url: https://github.com/xjiangorg/nodejs-zsuhxhkw
